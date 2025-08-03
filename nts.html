@@ -1,0 +1,112 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>NTS / NAT / GAT Calculator</title>
+    <link rel="stylesheet" href="../style.css">
+    <link rel="stylesheet" href="../aos.min.css">
+</head>
+<body>
+    <header data-aos="fade-down" data-aos-delay="100">
+        <h1>NTS / NAT / GAT Calculator</h1>
+        <a href="../index.html" class="back-link">&larr; Back to Home</a>
+    </header>
+    <main>
+        <div class="centered-container" data-aos="fade-up" data-aos-delay="200">
+            <form id="nts-form" class="calc-form">
+                <div class="form-group" data-aos="fade-up" data-aos-delay="300">
+                    <label for="hssc">HSSC %:</label>
+                    <input type="number" id="hssc" required placeholder="e.g. 85" min="0" max="100">
+                </div>
+                <div class="form-group" data-aos="fade-up" data-aos-delay="350">
+                    <label for="nat">NAT / GAT %:</label>
+                    <input type="number" id="nat" required placeholder="e.g. 90" min="0" max="100">
+                </div>
+                <div class="form-btns" data-aos="fade-up" data-aos-delay="400">
+                    <button type="button" class="ripple-btn" onclick="calculateNTS(event)">Calculate</button>
+                    <button type="reset" class="ripple-btn">Reset</button>
+                </div>
+                <div id="nts-result" class="calc-result result-animate" aria-live="polite"></div>
+            </form>
+        </div>
+    </main>
+    <script>
+    // Loader animation
+    function showLoader(id) {
+        var el = document.getElementById(id);
+        el.innerHTML = '<span class="loader-text">Calculating<span class="dot">.</span><span class="dot">.</span><span class="dot">.</span></span>';
+    }
+
+    // Count-up and pulse animation for result
+    function animateResult(id, html, value) {
+        var el = document.getElementById(id);
+        el.style.opacity = 0;
+        setTimeout(function() {
+            if (typeof value === 'number') {
+                var start = 0;
+                var end = value;
+                var duration = 600;
+                var step = Math.max(0.05, Math.abs(end - start) / 40);
+                var current = start;
+                el.innerHTML = html.replace(/\d+(\.\d+)?/, start.toFixed(2));
+                el.style.opacity = 1;
+                el.classList.add('pulse');
+                var interval = setInterval(function() {
+                    current += step;
+                    if ((step > 0 && current >= end) || (step < 0 && current <= end)) {
+                        current = end;
+                        clearInterval(interval);
+                        setTimeout(function() { el.classList.remove('pulse'); }, 1000);
+                    }
+                    el.innerHTML = html.replace(/\d+(\.\d+)?/, current.toFixed(2));
+                }, duration / Math.abs((end - start) / step));
+            } else {
+                el.innerHTML = html;
+                el.style.opacity = 1;
+                el.classList.add('pulse');
+                setTimeout(function() { el.classList.remove('pulse'); }, 1000);
+            }
+        }, 150);
+    }
+
+    function calculateNTS() {
+        showLoader('nts-result');
+        setTimeout(function() {
+            var h = parseFloat(document.getElementById('hssc').value);
+            var n = parseFloat(document.getElementById('nat').value);
+            if ([h, n].some(function(x){return isNaN(x)||x<0||x>100;})) {
+                animateResult('nts-result', '<span class="error">Invalid input. Please enter valid percentages (0-100).</span>');
+                return;
+            }
+            var agg = (h * 0.5) + (n * 0.5);
+            animateResult('nts-result', 'Aggregate: <b>' + agg.toFixed(2) + '%</b> <br><span style="font-size:0.95em;color:#555;">(HSSC: ' + (h * 0.5).toFixed(2) + '%, NAT/GAT: ' + (n * 0.5).toFixed(2) + '%)</span>', agg);
+        }, 400);
+    }
+    document.getElementById('nts-form').addEventListener('reset', function(){
+        animateResult('nts-result', '');
+    });
+
+    // Ripple effect for buttons
+    var rippleBtns = document.querySelectorAll('.ripple-btn');
+    for (var i = 0; i < rippleBtns.length; i++) {
+        rippleBtns[i].addEventListener('click', function (e) {
+            var circle = document.createElement('span');
+            circle.className = 'ripple';
+            var rect = this.getBoundingClientRect();
+            circle.style.left = (e.clientX - rect.left) + 'px';
+            circle.style.top = (e.clientY - rect.top) + 'px';
+            this.appendChild(circle);
+            setTimeout(function() { circle.remove(); }, 600);
+        });
+    }
+
+    // Initialize AOS
+    window.addEventListener('DOMContentLoaded', function() {
+        if (window.AOS) AOS.init({ duration: 600, once: true });
+    });
+    </script>
+    <script src="../aos.min.js"></script>
+</body>
+</html>

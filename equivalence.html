@@ -1,0 +1,141 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SSC / HSSC Equivalence Calculator for Foreign Students</title>
+    <link rel="stylesheet" href="../style.css">
+    <link rel="stylesheet" href="../aos.min.css">
+</head>
+<body>
+    <header data-aos="fade-down" data-aos-delay="100">
+        <h1>SSC / HSSC Equivalence Calculator for Foreign Students</h1>
+        <a href="../index.html" class="back-link">&larr; Back to Home</a>
+    </header>
+    <main>
+        <form id="equivalence-form" class="calc-form container" autocomplete="off" data-aos="fade-up" data-aos-delay="200">
+            <div class="form-group" data-aos="fade-up" data-aos-delay="300">
+                <label for="grades">Enter O/A Level Grades (comma separated, e.g. A*,A,B):</label>
+                <input type="text" id="grades" placeholder="e.g. A*,A,B">
+            </div>
+            <div class="form-group" data-aos="fade-up" data-aos-delay="350">
+                <label for="foreign-marks">Foreign Marks (optional):</label>
+                <input type="number" id="foreign-marks" min="0" step="any" placeholder="e.g. 850">
+            </div>
+            <div class="form-group" data-aos="fade-up" data-aos-delay="400">
+                <label for="foreign-total">Foreign Total Marks (optional):</label>
+                <input type="number" id="foreign-total" min="1" step="any" placeholder="e.g. 1000">
+            </div>
+            <div class="form-group" data-aos="fade-up" data-aos-delay="450">
+                <label for="local-total">Local Board Total Marks (optional):</label>
+                <input type="number" id="local-total" min="1" step="any" placeholder="e.g. 1100">
+            </div>
+            <div class="form-btns" data-aos="fade-up" data-aos-delay="500">
+                <button type="button" class="ripple-btn" onclick="calculateEquivalence(event)">Calculate</button>
+            </div>
+        </form>
+        <div id="equivalence-result" class="calc-result result-animate" aria-live="polite"></div>
+    </main>
+    <script>
+    // Loader animation
+    function showLoader(id) {
+        var el = document.getElementById(id);
+        el.innerHTML = '<span class="loader-text">Calculating<span class="dot">.</span><span class="dot">.</span><span class="dot">.</span></span>';
+    }
+
+    // Count-up and pulse animation for result
+    function animateResult(id, html, value) {
+        var el = document.getElementById(id);
+        el.style.opacity = 0;
+        setTimeout(function() {
+            if (typeof value === 'number') {
+                var start = 0;
+                var end = value;
+                var duration = 600;
+                var step = Math.max(0.05, Math.abs(end - start) / 40);
+                var current = start;
+                el.innerHTML = html.replace(/\d+(\.\d+)?/, start.toFixed(2));
+                el.style.opacity = 1;
+                el.classList.add('pulse');
+                var interval = setInterval(function() {
+                    current += step;
+                    if ((step > 0 && current >= end) || (step < 0 && current <= end)) {
+                        current = end;
+                        clearInterval(interval);
+                        setTimeout(function() { el.classList.remove('pulse'); }, 1000);
+                    }
+                    el.innerHTML = html.replace(/\d+(\.\d+)?/, current.toFixed(2));
+                }, duration / Math.abs((end - start) / step));
+            } else {
+                el.innerHTML = html;
+                el.style.opacity = 1;
+                el.classList.add('pulse');
+                setTimeout(function() { el.classList.remove('pulse'); }, 1000);
+            }
+        }, 150);
+    }
+
+    function calculateEquivalence() {
+        showLoader('equivalence-result');
+        setTimeout(function() {
+            var resultDiv = document.getElementById('equivalence-result');
+            // Try marks-based calculation first if all fields are filled
+            var foreignMarks = parseFloat(document.getElementById('foreign-marks').value);
+            var foreignTotal = parseFloat(document.getElementById('foreign-total').value);
+            var localTotal = parseFloat(document.getElementById('local-total').value);
+            if (!isNaN(foreignMarks) && !isNaN(foreignTotal) && !isNaN(localTotal) && foreignTotal > 0 && localTotal > 0) {
+                var eqMarks = ((foreignMarks / foreignTotal) * localTotal);
+                animateResult('equivalence-result', 'Equivalent Marks: <b>' + eqMarks.toFixed(2) + '</b>', eqMarks);
+                return;
+            }
+            // fallback to grade mapping
+            var ibcc = {"A*":90,"A":85,"B":75,"C":65,"D":55,"E":45,"F":0};
+            var gradesStr = document.getElementById('grades').value;
+            if (!gradesStr.trim()) {
+                animateResult('equivalence-result', '<span class="error">Please enter grades or marks.</span>');
+                return;
+            }
+            var grades = gradesStr.split(',').map(function(g){return g.trim().toUpperCase();}).filter(function(g){return g;});
+            var total = 0, valid = 0;
+            for (var i = 0; i < grades.length; i++) {
+                if (ibcc[grades[i]] !== undefined) { total += ibcc[grades[i]]; valid++; }
+            }
+            if (valid === 0) {
+                animateResult('equivalence-result', '<span class="error">Invalid grades. Please use A*, A, B, C, D, E, F.</span>');
+                return;
+            }
+            var avg = total / valid;
+            animateResult('equivalence-result', 'IBCC Equivalent Percentage: <b>' + avg.toFixed(2) + '%</b>', avg);
+        }, 400);
+    }
+
+    // Clear result on input change for better UX
+    ["grades", "foreign-marks", "foreign-total", "local-total"].forEach(function(id) {
+        document.getElementById(id).addEventListener('input', function () {
+            animateResult('equivalence-result', '');
+        });
+    });
+
+    // Ripple effect for buttons
+    var rippleBtns = document.querySelectorAll('.ripple-btn');
+    for (var i = 0; i < rippleBtns.length; i++) {
+        rippleBtns[i].addEventListener('click', function (e) {
+            var circle = document.createElement('span');
+            circle.className = 'ripple';
+            var rect = this.getBoundingClientRect();
+            circle.style.left = (e.clientX - rect.left) + 'px';
+            circle.style.top = (e.clientY - rect.top) + 'px';
+            this.appendChild(circle);
+            setTimeout(function() { circle.remove(); }, 600);
+        });
+    }
+
+    // Initialize AOS
+    window.addEventListener('DOMContentLoaded', function() {
+        if (window.AOS) AOS.init({ duration: 600, once: true });
+    });
+    </script>
+    <script src="../aos.min.js"></script>
+</body>
+</html>

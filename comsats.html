@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>COMSATS Merit Calculator</title>
+    <link rel="stylesheet" href="../style.css">
+    <link rel="stylesheet" href="../aos.min.css">
+</head>
+<body>
+    <header data-aos="fade-down" data-aos-delay="100">
+        <h1 class="pulse">COMSATS Merit Calculator</h1>
+        <a href="../index.html" class="back-link">&larr; Back to Home</a>
+    </header>
+    <main>
+        <div class="centered-container" data-aos="fade-up" data-aos-delay="200">
+            <form id="comsats-form" class="calc-form">
+                <div class="form-group" data-aos="fade-up" data-aos-delay="300">
+                    <label for="test">Test %:</label>
+                    <input type="number" id="test" required placeholder="e.g. 85" min="0" max="100">
+                </div>
+                <div class="form-group" data-aos="fade-up" data-aos-delay="350">
+                    <label for="fsc">FSc %:</label>
+                    <input type="number" id="fsc" required placeholder="e.g. 90" min="0" max="100">
+                </div>
+                <div class="form-group" data-aos="fade-up" data-aos-delay="400">
+                    <label for="matric">Matric %:</label>
+                    <input type="number" id="matric" required placeholder="e.g. 88" min="0" max="100">
+                </div>
+                <div class="form-btns" data-aos="fade-up" data-aos-delay="450">
+                    <button type="button" class="ripple-btn" onclick="calculateCOMSATS(event)">Calculate</button>
+                    <button type="reset" class="ripple-btn">Reset</button>
+                </div>
+                <div id="comsats-result" class="calc-result result-animate" aria-live="polite"></div>
+            </form>
+        </div>
+    </main>
+    <script>
+    // Loader animation
+    function showLoader(id) {
+        var el = document.getElementById(id);
+        el.innerHTML = '<span class="loader-text">Calculating<span class="dot">.</span><span class="dot">.</span><span class="dot">.</span></span>';
+    }
+
+    // Count-up and pulse animation for result
+    function animateResult(id, html, value) {
+        var el = document.getElementById(id);
+        el.style.opacity = 0;
+        setTimeout(function() {
+            if (typeof value === 'number') {
+                var start = 0;
+                var end = value;
+                var duration = 600;
+                var step = Math.max(0.05, Math.abs(end - start) / 40);
+                var current = start;
+                el.innerHTML = html.replace(/\d+(\.\d+)?/, start.toFixed(2));
+                el.style.opacity = 1;
+                el.classList.add('pulse');
+                var interval = setInterval(function() {
+                    current += step;
+                    if ((step > 0 && current >= end) || (step < 0 && current <= end)) {
+                        current = end;
+                        clearInterval(interval);
+                        setTimeout(function() { el.classList.remove('pulse'); }, 1000);
+                    }
+                    el.innerHTML = html.replace(/\d+(\.\d+)?/, current.toFixed(2));
+                }, duration / Math.abs((end - start) / step));
+            } else {
+                el.innerHTML = html;
+                el.style.opacity = 1;
+                el.classList.add('pulse');
+                setTimeout(function() { el.classList.remove('pulse'); }, 1000);
+            }
+        }, 150);
+    }
+
+    function calculateCOMSATS() {
+        showLoader('comsats-result');
+        setTimeout(function() {
+            var t = parseFloat(document.getElementById('test').value);
+            var f = parseFloat(document.getElementById('fsc').value);
+            var m = parseFloat(document.getElementById('matric').value);
+            if ([t, f, m].some(function(x){return isNaN(x)||x<0||x>100;})) {
+                animateResult('comsats-result','<span class="error">Invalid input. Please enter valid percentages (0-100).</span>');
+                return;
+            }
+            var agg = (t*0.5)+(f*0.4)+(m*0.1);
+            animateResult('comsats-result', 'Aggregate: <b>' + agg.toFixed(2) + '%</b> <br><span style="font-size:0.95em;color:#555;">(Test: ' + (t*0.5).toFixed(2) + '%, FSc: ' + (f*0.4).toFixed(2) + '%, Matric: ' + (m*0.1).toFixed(2) + '%)</span>', agg);
+        }, 400);
+    }
+
+    document.getElementById('comsats-form').addEventListener('reset', function(){
+        animateResult('comsats-result', '');
+    });
+
+    // Ripple effect for buttons
+    var rippleBtns = document.querySelectorAll('.ripple-btn');
+    for (var i = 0; i < rippleBtns.length; i++) {
+        rippleBtns[i].addEventListener('click', function (e) {
+            var circle = document.createElement('span');
+            circle.className = 'ripple';
+            var rect = this.getBoundingClientRect();
+            circle.style.left = (e.clientX - rect.left) + 'px';
+            circle.style.top = (e.clientY - rect.top) + 'px';
+            this.appendChild(circle);
+            setTimeout(function () { circle.remove(); }, 600);
+        });
+    }
+
+    // Initialize AOS
+    if (window.AOS) AOS.init({ duration: 600, once: true });
+    </script>
+    <script src="../aos.min.js"></script>
+</body>
+</html>

@@ -1,0 +1,101 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Grade to GPA Converter</title>
+    <link rel="stylesheet" href="../style.css">
+    <link rel="stylesheet" href="../aos.min.css">
+</head>
+<body>
+    <header data-aos="fade-down" data-aos-delay="100">
+        <h1>Grade to GPA Converter</h1>
+        <a href="../index.html" class="back-link">&larr; Back to Home</a>
+    </header>
+    <main>
+        <form id="grade-gpa-form" class="calc-form container" data-aos="fade-up" data-aos-delay="200">
+            <div class="form-group" data-aos="fade-up" data-aos-delay="300">
+                <label for="grade">Enter Grade (A+, A, B+, etc.):</label>
+                <input type="text" id="grade" required placeholder="e.g. A+">
+            </div>
+            <div class="form-btns" data-aos="fade-up" data-aos-delay="350">
+                <button type="button" class="ripple-btn" onclick="convertGradeToGPA(event)">Convert</button>
+            </div>
+            <div id="grade-gpa-result" class="calc-result result-animate" aria-live="polite"></div>
+        </form>
+    </main>
+    <script>
+    // Loader animation
+    function showLoader(id) {
+        var el = document.getElementById(id);
+        el.innerHTML = '<span class="loader-text">Calculating<span class="dot">.</span><span class="dot">.</span><span class="dot">.</span></span>';
+    }
+
+    // Count-up and pulse animation for result
+    function animateResult(id, html, value) {
+        var el = document.getElementById(id);
+        el.style.opacity = 0;
+        setTimeout(function() {
+            if (typeof value === 'number') {
+                var start = 0;
+                var end = value;
+                var duration = 600;
+                var step = Math.max(0.05, Math.abs(end - start) / 40);
+                var current = start;
+                el.innerHTML = html.replace(/\d+(\.\d+)?/, start.toFixed(2));
+                el.style.opacity = 1;
+                el.classList.add('pulse');
+                var interval = setInterval(function() {
+                    current += step;
+                    if ((step > 0 && current >= end) || (step < 0 && current <= end)) {
+                        current = end;
+                        clearInterval(interval);
+                        setTimeout(function() { el.classList.remove('pulse'); }, 1000);
+                    }
+                    el.innerHTML = html.replace(/\d+(\.\d+)?/, current.toFixed(2));
+                }, duration / Math.abs((end - start) / step));
+            } else {
+                el.innerHTML = html;
+                el.style.opacity = 1;
+                el.classList.add('pulse');
+                setTimeout(function() { el.classList.remove('pulse'); }, 1000);
+            }
+        }, 150);
+    }
+
+    function convertGradeToGPA() {
+        showLoader('grade-gpa-result');
+        setTimeout(function() {
+            var gradeMap = {"A+":4.0,"A":3.7,"B+":3.3,"B":3.0,"C+":2.7,"C":2.3,"D":2.0,"E":1.0,"F":0};
+            var g = document.getElementById('grade').value.trim().toUpperCase();
+            if (gradeMap[g] === undefined) {
+                animateResult('grade-gpa-result', '<span class="error">Invalid grade.</span>');
+                return;
+            }
+            animateResult('grade-gpa-result', 'GPA: <b>' + gradeMap[g] + '</b>', gradeMap[g]);
+        }, 400);
+    }
+
+    // Ripple effect for buttons
+    var rippleBtns = document.querySelectorAll('.ripple-btn');
+    for (var i = 0; i < rippleBtns.length; i++) {
+        rippleBtns[i].addEventListener('click', function (e) {
+            var circle = document.createElement('span');
+            circle.className = 'ripple';
+            var rect = this.getBoundingClientRect();
+            circle.style.left = (e.clientX - rect.left) + 'px';
+            circle.style.top = (e.clientY - rect.top) + 'px';
+            this.appendChild(circle);
+            setTimeout(function() { circle.remove(); }, 600);
+        });
+    }
+
+    // Initialize AOS
+    window.addEventListener('DOMContentLoaded', function() {
+        if (window.AOS) AOS.init({ duration: 600, once: true });
+    });
+    </script>
+    <script src="../aos.min.js"></script>
+</body>
+</html>

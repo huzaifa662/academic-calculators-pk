@@ -1,0 +1,116 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Credit Hour GPA Impact Calculator</title>
+    <link rel="stylesheet" href="../style.css">
+    <link rel="stylesheet" href="../aos.min.css">
+</head>
+<body>
+    <header data-aos="fade-down" data-aos-delay="100">
+        <h1>Credit Hour GPA Impact Calculator</h1>
+        <a href="../index.html" class="back-link">&larr; Back to Home</a>
+    </header>
+    <main>
+        <form id="credit-hour-form" class="calc-form container" data-aos="fade-up" data-aos-delay="200">
+            <div class="form-group" data-aos="fade-up" data-aos-delay="300">
+                <label>Old GPA:</label>
+                <input type="number" id="oldgpa" step="0.01" required placeholder="e.g. 3.2">
+            </div>
+            <div class="form-group" data-aos="fade-up" data-aos-delay="350">
+                <label>Total Credits (before):</label>
+                <input type="number" id="oldcredits" required placeholder="e.g. 90">
+            </div>
+            <div class="form-group" data-aos="fade-up" data-aos-delay="400">
+                <label>New Grade Point:</label>
+                <input type="number" id="newgpa" step="0.01" required placeholder="e.g. 4.0">
+            </div>
+            <div class="form-group" data-aos="fade-up" data-aos-delay="450">
+                <label>New Credit Hours:</label>
+                <input type="number" id="newcredits" required placeholder="e.g. 3">
+            </div>
+            <div class="form-btns" data-aos="fade-up" data-aos-delay="500">
+                <button type="button" class="ripple-btn" onclick="calculateCreditImpact(event)">Calculate</button>
+            </div>
+        </form>
+        <div id="credit-hour-result" class="calc-result result-animate" aria-live="polite"></div>
+    </main>
+    <script>
+    // Loader animation
+    function showLoader(id) {
+        var el = document.getElementById(id);
+        el.innerHTML = '<span class="loader-text">Calculating<span class="dot">.</span><span class="dot">.</span><span class="dot">.</span></span>';
+    }
+
+    // Count-up and pulse animation for result
+    function animateResult(id, html, value) {
+        var el = document.getElementById(id);
+        el.style.opacity = 0;
+        setTimeout(function() {
+            if (typeof value === 'number') {
+                var start = 0;
+                var end = value;
+                var duration = 600;
+                var step = Math.max(0.05, Math.abs(end - start) / 40);
+                var current = start;
+                el.innerHTML = html.replace(/\d+(\.\d+)?/, start.toFixed(2));
+                el.style.opacity = 1;
+                el.classList.add('pulse');
+                var interval = setInterval(function() {
+                    current += step;
+                    if ((step > 0 && current >= end) || (step < 0 && current <= end)) {
+                        current = end;
+                        clearInterval(interval);
+                        setTimeout(function() { el.classList.remove('pulse'); }, 1000);
+                    }
+                    el.innerHTML = html.replace(/\d+(\.\d+)?/, current.toFixed(2));
+                }, duration / Math.abs((end - start) / step));
+            } else {
+                el.innerHTML = html;
+                el.style.opacity = 1;
+                el.classList.add('pulse');
+                setTimeout(function() { el.classList.remove('pulse'); }, 1000);
+            }
+        }, 150);
+    }
+
+    function calculateCreditImpact() {
+        showLoader('credit-hour-result');
+        setTimeout(function() {
+            var oldgpa = parseFloat(document.getElementById('oldgpa').value);
+            var oldcredits = parseFloat(document.getElementById('oldcredits').value);
+            var newgpa = parseFloat(document.getElementById('newgpa').value);
+            var newcredits = parseFloat(document.getElementById('newcredits').value);
+            if ([oldgpa, oldcredits, newgpa, newcredits].some(function(x){return isNaN(x);}) || oldcredits < 0 || newcredits <= 0) {
+                animateResult('credit-hour-result', 'Invalid input.');
+                return;
+            }
+            var newcgpa = ((oldgpa * oldcredits) + (newgpa * newcredits)) / (oldcredits + newcredits);
+            animateResult('credit-hour-result', 'New CGPA: <b>' + newcgpa.toFixed(2) + '</b>', newcgpa);
+        }, 400);
+    }
+
+    // Ripple effect for buttons
+    var rippleBtns = document.querySelectorAll('.ripple-btn');
+    for (var i = 0; i < rippleBtns.length; i++) {
+        rippleBtns[i].addEventListener('click', function (e) {
+            var circle = document.createElement('span');
+            circle.className = 'ripple';
+            var rect = this.getBoundingClientRect();
+            circle.style.left = (e.clientX - rect.left) + 'px';
+            circle.style.top = (e.clientY - rect.top) + 'px';
+            this.appendChild(circle);
+            setTimeout(function() { circle.remove(); }, 600);
+        });
+    }
+
+    // Initialize AOS
+    window.addEventListener('DOMContentLoaded', function() {
+        if (window.AOS) AOS.init({ duration: 600, once: true });
+    });
+    </script>
+    <script src="../aos.min.js"></script>
+</body>
+</html>

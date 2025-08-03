@@ -1,0 +1,189 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>University GPA / CGPA Calculator</title>
+    <link rel="stylesheet" href="../style.css">
+    <link rel="stylesheet" href="../aos.min.css">
+</head>
+<body>
+    <header data-aos="fade-down" data-aos-delay="100">
+        <h1>University GPA / CGPA Calculator</h1>
+        <a href="../index.html" class="back-link">&larr; Back to Home</a>
+    </header>
+    <main>
+        <div class="centered-container" data-aos="fade-up" data-aos-delay="200">
+            <form id="gpa-form" class="calc-form">
+                <div class="form-group" data-aos="fade-up" data-aos-delay="300">
+                    <label for="gradePoints">Enter Grade Points <span aria-label="required" title="required" style="color:red">*</span> (comma separated, e.g. 3.7, 3.3, 4.0):</label>
+                    <input type="text" id="gradePoints" required placeholder="e.g. 3.7, 3.3, 4.0" aria-required="true" autocomplete="off">
+                </div>
+                <div class="form-group" data-aos="fade-up" data-aos-delay="350">
+                    <label for="creditHours">Enter Credit Hours <span aria-label="required" title="required" style="color:red">*</span> (comma separated, e.g. 3, 4, 2):</label>
+                    <input type="text" id="creditHours" required placeholder="e.g. 3, 4, 2" aria-required="true" autocomplete="off">
+                </div>
+                <div class="form-btns" data-aos="fade-up" data-aos-delay="400">
+                    <button type="button" class="ripple-btn" onclick="calculateGPA(event)">Calculate GPA</button>
+                    <button type="reset" class="ripple-btn">Reset</button>
+                </div>
+                <div id="gpa-result" class="calc-result result-animate" aria-live="polite"></div>
+            </form>
+            <form id="cgpa-form" class="calc-form">
+                <div class="form-group" data-aos="fade-up" data-aos-delay="450">
+                    <label for="allGpas">All Semester GPAs <span aria-label="required" title="required" style="color:red">*</span> (comma separated):</label>
+                    <input type="text" id="allGpas" required placeholder="e.g. 3.5, 3.7, 3.2" aria-required="true" autocomplete="off">
+                </div>
+                <div class="form-group" data-aos="fade-up" data-aos-delay="500">
+                    <label for="allCredits">Semester Credit Hours <span aria-label="required" title="required" style="color:red">*</span> (comma separated):</label>
+                    <input type="text" id="allCredits" required placeholder="e.g. 15, 18, 16" aria-required="true" autocomplete="off">
+                </div>
+                <div class="form-btns" data-aos="fade-up" data-aos-delay="550">
+                    <button type="button" class="ripple-btn" onclick="calculateCGPA(event)">Calculate CGPA</button>
+                    <button type="reset" class="ripple-btn">Reset</button>
+                </div>
+                <div id="cgpa-result" class="calc-result result-animate" aria-live="polite"></div>
+            </form>
+        </div>
+    </main>
+    <script>
+    // Loader animation
+    function showLoader(id) {
+        const el = document.getElementById(id);
+        el.innerHTML = '<span class="loader-text">Calculating<span class="dot">.</span><span class="dot">.</span><span class="dot">.</span></span>';
+    }
+
+    // Count-up and pulse animation for result
+    function animateResult(id, html, value) {
+        const el = document.getElementById(id);
+        el.style.opacity = 0;
+        setTimeout(() => {
+            if (typeof value === 'number') {
+                let start = 0;
+                const end = value;
+                const duration = 600;
+                const step = Math.max(1, Math.abs(end - start) / 40);
+                let current = start;
+                el.innerHTML = html.replace(/\d+(\.\d+)?/, start.toFixed(2));
+                el.style.opacity = 1;
+                el.classList.add('pulse');
+                const interval = setInterval(() => {
+                    current += step;
+                    if ((step > 0 && current >= end) || (step < 0 && current <= end)) {
+                        current = end;
+                        clearInterval(interval);
+                        setTimeout(() => el.classList.remove('pulse'), 1000);
+                    }
+                    el.innerHTML = html.replace(/\d+(\.\d+)?/, current.toFixed(2));
+                }, duration / Math.abs((end - start) / step));
+            } else {
+                el.innerHTML = html;
+                el.style.opacity = 1;
+                el.classList.add('pulse');
+                setTimeout(() => el.classList.remove('pulse'), 1000);
+            }
+        }, 150);
+    }
+
+    function parseNumberList(str) {
+        // Accepts comma or space separated, trims whitespace, ignores empty
+        return str.split(',').map(s => s.trim()).filter(s => s.length > 0).map(Number);
+    }
+
+    function calculateGPA() {
+        showLoader('gpa-result');
+        setTimeout(() => {
+            const points = parseNumberList(document.getElementById('gradePoints').value);
+            const credits = parseNumberList(document.getElementById('creditHours').value);
+            if (points.length !== credits.length || points.length === 0) {
+                animateResult('gpa-result', '<span class="error">Please enter the same number of grade points and credit hours, separated by commas.</span>');
+                return;
+            }
+            if (points.some(isNaN) || credits.some(isNaN)) {
+                animateResult('gpa-result', '<span class="error">Invalid input. Please enter only numbers separated by commas.</span>');
+                return;
+            }
+            let total = 0, ch = 0;
+            for (let i = 0; i < points.length; i++) {
+                total += points[i] * credits[i];
+                ch += credits[i];
+            }
+            if (ch === 0) {
+                animateResult('gpa-result', '<span class="error">Invalid input. Credit hours cannot be zero.</span>');
+                return;
+            }
+            const gpa = (total / ch).toFixed(2);
+            animateResult('gpa-result', `Semester GPA: <b>${gpa}</b>`, parseFloat(gpa));
+        }, 400);
+    }
+
+    function calculateCGPA() {
+        showLoader('cgpa-result');
+        setTimeout(() => {
+            const gpas = parseNumberList(document.getElementById('allGpas').value);
+            const credits = parseNumberList(document.getElementById('allCredits').value);
+            if (gpas.length !== credits.length || gpas.length === 0) {
+                animateResult('cgpa-result', '<span class="error">Please enter the same number of GPAs and credit hours, separated by commas.</span>');
+                return;
+            }
+            if (gpas.some(isNaN) || credits.some(isNaN)) {
+                animateResult('cgpa-result', '<span class="error">Invalid input. Please enter only numbers separated by commas.</span>');
+                return;
+            }
+            let total = 0, ch = 0;
+            for (let i = 0; i < gpas.length; i++) {
+                total += gpas[i] * credits[i];
+                ch += credits[i];
+            }
+            if (ch === 0) {
+                animateResult('cgpa-result', '<span class="error">Invalid input. Credit hours cannot be zero.</span>');
+                return;
+            }
+            const cgpa = (total / ch).toFixed(2);
+            animateResult('cgpa-result', `CGPA: <b>${cgpa}</b>`, parseFloat(cgpa));
+        }, 400);
+    }
+
+    // Reset result areas on form reset
+    document.getElementById('gpa-form').addEventListener('reset', function () {
+        animateResult('gpa-result', '');
+    });
+    document.getElementById('cgpa-form').addEventListener('reset', function () {
+        animateResult('cgpa-result', '');
+    });
+
+    // Clear result on input change for better UX
+    document.getElementById('gradePoints').addEventListener('input', function () {
+        animateResult('gpa-result', '');
+    });
+    document.getElementById('creditHours').addEventListener('input', function () {
+        animateResult('gpa-result', '');
+    });
+    document.getElementById('allGpas').addEventListener('input', function () {
+        animateResult('cgpa-result', '');
+    });
+    document.getElementById('allCredits').addEventListener('input', function () {
+        animateResult('cgpa-result', '');
+    });
+
+    // Ripple effect for buttons
+    document.querySelectorAll('.ripple-btn').forEach(btn => {
+        btn.addEventListener('click', function (e) {
+            const circle = document.createElement('span');
+            circle.className = 'ripple';
+            const rect = btn.getBoundingClientRect();
+            circle.style.left = (e.clientX - rect.left) + 'px';
+            circle.style.top = (e.clientY - rect.top) + 'px';
+            btn.appendChild(circle);
+            setTimeout(() => circle.remove(), 600);
+        });
+    });
+
+    // Initialize AOS
+    window.addEventListener('DOMContentLoaded', function() {
+        if (window.AOS) AOS.init({ duration: 600, once: true });
+    });
+    </script>
+    <script src="../aos.min.js"></script>
+</body>
+</html>

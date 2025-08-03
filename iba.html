@@ -1,0 +1,117 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>IBA Karachi (SAT / Aptitude) Aggregate</title>
+    <link rel="stylesheet" href="../style.css">
+    <link rel="stylesheet" href="../aos.min.css">
+</head>
+<body>
+    <header data-aos="fade-down" data-aos-delay="100">
+        <h1>IBA Karachi (SAT / Aptitude) Aggregate</h1>
+        <a href="../index.html" class="back-link">&larr; Back to Home</a>
+    </header>
+    <main>
+        <div class="centered-container" data-aos="fade-up" data-aos-delay="200">
+            <form id="iba-form" class="calc-form">
+                <div class="form-group" data-aos="fade-up" data-aos-delay="300">
+                    <label for="matric">Matric %:</label>
+                    <input type="number" id="matric" required placeholder="e.g. 85" min="0" max="100">
+                </div>
+                <div class="form-group" data-aos="fade-up" data-aos-delay="350">
+                    <label for="inter">Inter %:</label>
+                    <input type="number" id="inter" required placeholder="e.g. 90" min="0" max="100">
+                </div>
+                <div class="form-group" data-aos="fade-up" data-aos-delay="400">
+                    <label for="sat">SAT / Aptitude %:</label>
+                    <input type="number" id="sat" required placeholder="e.g. 88" min="0" max="100">
+                </div>
+                <div class="form-btns" data-aos="fade-up" data-aos-delay="450">
+                    <button type="button" class="ripple-btn" onclick="calculateIBA(event)">Calculate</button>
+                    <button type="reset" class="ripple-btn">Reset</button>
+                </div>
+                <div id="iba-result" class="calc-result result-animate" aria-live="polite"></div>
+            </form>
+        </div>
+    </main>
+    <script>
+    // Loader animation
+    function showLoader(id) {
+        var el = document.getElementById(id);
+        el.innerHTML = '<span class="loader-text">Calculating<span class="dot">.</span><span class="dot">.</span><span class="dot">.</span></span>';
+    }
+
+    // Count-up and pulse animation for result
+    function animateResult(id, html, value) {
+        var el = document.getElementById(id);
+        el.style.opacity = 0;
+        setTimeout(function() {
+            if (typeof value === 'number') {
+                var start = 0;
+                var end = value;
+                var duration = 600;
+                var step = Math.max(0.05, Math.abs(end - start) / 40);
+                var current = start;
+                el.innerHTML = html.replace(/\d+(\.\d+)?/, start.toFixed(2));
+                el.style.opacity = 1;
+                el.classList.add('pulse');
+                var interval = setInterval(function() {
+                    current += step;
+                    if ((step > 0 && current >= end) || (step < 0 && current <= end)) {
+                        current = end;
+                        clearInterval(interval);
+                        setTimeout(function() { el.classList.remove('pulse'); }, 1000);
+                    }
+                    el.innerHTML = html.replace(/\d+(\.\d+)?/, current.toFixed(2));
+                }, duration / Math.abs((end - start) / step));
+            } else {
+                el.innerHTML = html;
+                el.style.opacity = 1;
+                el.classList.add('pulse');
+                setTimeout(function() { el.classList.remove('pulse'); }, 1000);
+            }
+        }, 150);
+    }
+
+    function calculateIBA() {
+        showLoader('iba-result');
+        setTimeout(function() {
+            var matric = parseFloat(document.getElementById('matric').value);
+            var inter = parseFloat(document.getElementById('inter').value);
+            var sat = parseFloat(document.getElementById('sat').value);
+            if ([matric, inter, sat].some(function(x){return isNaN(x)||x<0||x>100;})) {
+                animateResult('iba-result', '<span class="error">Invalid input. Please enter valid percentages (0-100).</span>');
+                return;
+            }
+            var agg = (matric * 0.2) + (inter * 0.3) + (sat * 0.5);
+            animateResult('iba-result', 'Aggregate: <b>' + agg.toFixed(2) + '%</b> <br><span style="font-size:0.95em;color:#555;">(Matric: ' + (matric * 0.2).toFixed(2) + '%, Inter: ' + (inter * 0.3).toFixed(2) + '%, SAT/Aptitude: ' + (sat * 0.5).toFixed(2) + '%)</span>', agg);
+        }, 400);
+    }
+    document.getElementById('iba-form').addEventListener('reset', function(){
+        animateResult('iba-result', '');
+    });
+
+    // Ripple effect for buttons
+    var rippleBtns = document.querySelectorAll('.ripple-btn');
+    for (var i = 0; i < rippleBtns.length; i++) {
+        rippleBtns[i].addEventListener('click', function (e) {
+            var circle = document.createElement('span');
+            circle.className = 'ripple';
+            var rect = this.getBoundingClientRect();
+            circle.style.left = (e.clientX - rect.left) + 'px';
+            circle.style.top = (e.clientY - rect.top) + 'px';
+            this.appendChild(circle);
+            setTimeout(function() { circle.remove(); }, 600);
+        });
+    }
+
+    // Initialize AOS
+    window.addEventListener('DOMContentLoaded', function() {
+        if (window.AOS) AOS.init({ duration: 600, once: true });
+    });
+    </script>
+    <script src="../aos.min.js"></script>
+</body>
+</html>
