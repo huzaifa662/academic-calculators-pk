@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Academic Calculators Pakistan</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <header>
+        <img src="assets/logo.png" alt="Logo" class="logo">
+        <h1 id="main-heading">Academic Calculators Pakistan</h1>
+        <p>Free, essential calculators for Pakistani students</p>
+    </header>
+    <main>
+        <section class="calculator-section">
+            <h2>GPA / CGPA Calculators</h2>
+            <div class="calculator-grid">
+                <a class="card ripple-btn" href="calculators/university-gpa.html" data-aos="zoom-in" data-aos-delay="250">
+                    <span class="icon">🎓</span> University GPA / CGPA Calculator
+                </a>
+                <a class="card ripple-btn" href="calculators/matric-marks-gpa.html" data-aos="zoom-in" data-aos-delay="300">
+                    <span class="icon">📄</span> Matric Marks to GPA
+                </a>
+                <a class="card ripple-btn" href="calculators/fsc-gpa.html" data-aos="zoom-in" data-aos-delay="350">
+                    <span class="icon">📑</span> FSc GPA / Marks Calculator
+                </a>
+            </div>
+        </section>
+        <section class="calculator-section">
+            <h2>Aggregate Calculators for Entry Tests</h2>
+            <div class="calculator-grid">
+                <a class="card ripple-btn" href="calculators/nums.html" data-aos="zoom-in" data-aos-delay="350"><span class="icon">🧮</span> NUMS Aggregate Calculator</a>
+                <a class="card ripple-btn" href="calculators/mdcat.html" data-aos="zoom-in" data-aos-delay="400"><span class="icon">🧮</span> MDCAT Aggregate Calculator</a>
+                <a class="card ripple-btn" href="calculators/ecat.html" data-aos="zoom-in" data-aos-delay="450"><span class="icon">🧮</span> ECAT Aggregate Calculator</a>
+                <a class="card ripple-btn" href="calculators/nts.html" data-aos="zoom-in" data-aos-delay="500"><span class="icon">🧮</span> NTS / NAT / GAT Calculator</a>
+                <a class="card ripple-btn" href="calculators/fast.html" data-aos="zoom-in" data-aos-delay="550"><span class="icon">🏛️</span> FAST-NU Aggregate Calculator</a>
+                <a class="card ripple-btn" href="calculators/nust.html" data-aos="zoom-in" data-aos-delay="600"><span class="icon">🏛️</span> NUST Merit Calculator</a>
+                <a class="card ripple-btn" href="calculators/uet.html" data-aos="zoom-in" data-aos-delay="650"><span class="icon">🏛️</span> UET Merit Calculator</a>
+                <a class="card ripple-btn" href="calculators/comsats.html" data-aos="zoom-in" data-aos-delay="700"><span class="icon">🏛️</span> COMSATS Merit Calculator</a>
+                <a class="card ripple-btn" href="calculators/pieas.html" data-aos="zoom-in" data-aos-delay="750"><span class="icon">🏛️</span> PIEAS Aggregate Calculator</a>
+                <a class="card ripple-btn" href="calculators/lums.html" data-aos="zoom-in" data-aos-delay="800"><span class="icon">🏛️</span> LUMS (SAT + O/A levels) Calculator</a>
+                <a class="card ripple-btn" href="calculators/iba.html" data-aos="zoom-in" data-aos-delay="850"><span class="icon">🏛️</span> IBA Karachi (SAT / Aptitude) Aggregate</a>
+            </div>
+        </section>
+        <section class="calculator-section">
+            <h2>Other Academic Calculators</h2>
+            <div class="calculator-grid">
+                <a class="card ripple-btn" href="calculators/percentage-gpa.html" data-aos="zoom-in" data-aos-delay="450"><span class="icon">📊</span> Percentage to GPA Converter</a>
+                <a class="card ripple-btn" href="calculators/grade-gpa.html" data-aos="zoom-in" data-aos-delay="500"><span class="icon">📊</span> Grade to GPA Converter</a>
+                <a class="card ripple-btn" href="calculators/attendance.html" data-aos="zoom-in" data-aos-delay="550"><span class="icon">📅</span> Attendance Percentage Calculator</a>
+                <a class="card ripple-btn" href="calculators/credit-hour.html" data-aos="zoom-in" data-aos-delay="600"><span class="icon">⏳</span> Credit Hour GPA Impact Calculator</a>
+                <a class="card ripple-btn" href="calculators/marks-percentage.html" data-aos="zoom-in" data-aos-delay="650"><span class="icon">📈</span> Marks to Percentage Converter</a>
+                <a class="card ripple-btn" href="calculators/equivalence.html" data-aos="zoom-in" data-aos-delay="700"><span class="icon">🌐</span> SSC / HSSC Equivalence Calculator for Foreign Students</a>
+            </div>
+        </section>
+    </main>
+    <footer>
+        <p>&copy; 2025 Academic Calculators Pakistan</p>
+    </footer>
+        <p>&copy; 2025 Academic Calculators Pakistan</p>
+    <script src="aos.min.js"></script>
+    <script>
+    // Loader and pulse animation for main heading
+    window.addEventListener('DOMContentLoaded', function() {
+        var heading = document.getElementById('main-heading');
+        if (heading) {
+            heading.innerHTML = '<span class="loader-text">Academic Calculators Pakistan <span class="dot">.</span><span class="dot">.</span><span class="dot">.</span></span>';
+            setTimeout(function() {
+                heading.innerHTML = 'Academic Calculators Pakistan';
+                heading.classList.add('pulse');
+                setTimeout(function() { heading.classList.remove('pulse'); }, 1000);
+            }, 900);
+        }
+        // Ripple effect for all .ripple-btn (cards)
+        var rippleBtns = document.querySelectorAll('.ripple-btn');
+        for (var i = 0; i < rippleBtns.length; i++) {
+            rippleBtns[i].addEventListener('click', function (e) {
+                var circle = document.createElement('span');
+                circle.className = 'ripple';
+                var rect = this.getBoundingClientRect();
+                circle.style.left = (e.clientX - rect.left) + 'px';
+                circle.style.top = (e.clientY - rect.top) + 'px';
+                this.appendChild(circle);
+                setTimeout(function() { circle.remove(); }, 600);
+            });
+        }
+        if (window.AOS) AOS.init({ duration: 600, once: true });
+    });
+    </script>
+</html>
